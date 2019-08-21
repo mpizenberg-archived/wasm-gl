@@ -6,11 +6,12 @@ let scene;
 let point_cloud;
 let geometry;
 let renderer;
-let particles;
 let stats;
+let pos_buffer_attr;
+let col_buffer_attr;
 
-let nb_particles = 100000;
-let speed = 1000;
+let nb_particles = 1000000;
+let speed = 5000;
 let end_valid = 0;
 
 // Prepare WebGL context with THREE.
@@ -44,10 +45,12 @@ async function run() {
   );
 
   // Bind geometry to THREE buffers.
-  geometry.addAttribute("position", new THREE.BufferAttribute(positions, 3).setDynamic(true));
-  geometry.addAttribute("color", new THREE.BufferAttribute(colors, 3).setDynamic(true));
+  pos_buffer_attr = new THREE.BufferAttribute(positions, 3).setDynamic(true);
+  col_buffer_attr = new THREE.BufferAttribute(colors, 3).setDynamic(true);
+  geometry.addAttribute("position", pos_buffer_attr);
+  geometry.addAttribute("color", col_buffer_attr);
   let material = new THREE.PointsMaterial({size: 1, vertexColors: THREE.VertexColors});
-  particles = new THREE.Points(geometry, material);
+  let particles = new THREE.Points(geometry, material);
   scene.add(particles);
 
   // Setup the renderer.
@@ -73,9 +76,16 @@ function onWindowResize() {
 function renderLoop() {
 	let start_valid = end_valid;
 	end_valid = point_cloud.tick();
-	particles.geometry.setDrawRange(0, end_valid);
-	particles.geometry.getAttribute("position").needsUpdate = true;
-	particles.geometry.getAttribute("color").needsUpdate = true;
+	let nb_update = end_valid - start_valid;
+	if (nb_update > 0) {
+		geometry.setDrawRange(0, end_valid);
+		pos_buffer_attr.updateRange.offset = start_valid;
+		pos_buffer_attr.updateRange.count = end_valid - start_valid;
+		pos_buffer_attr.needsUpdate = true;
+		col_buffer_attr.updateRange.offset = start_valid;
+		col_buffer_attr.updateRange.count = end_valid - start_valid;
+		col_buffer_attr.needsUpdate = true;
+	}
 	renderer.render(scene, camera);
 	stats.update();
 	requestAnimationFrame(renderLoop);
