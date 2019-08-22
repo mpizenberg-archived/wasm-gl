@@ -28,43 +28,43 @@ geometry.setDrawRange(0, end_valid);
 run();
 
 async function run() {
-  // Initialize the wasm module.
-  const wasm = await init("pkg/wasm_gl_bg.wasm");
+	// Initialize the wasm module.
+	const wasm = await init("pkg/wasm_gl_bg.wasm");
 
-  // Initialize the point cloud.
-  point_cloud = PointCloud.new(nb_particles, speed);
-  const positions = new Float32Array(
-    wasm.memory.buffer,
-    point_cloud.points(),
-    3 * nb_particles
-  );
-  const colors = new Float32Array(
-    wasm.memory.buffer,
-    point_cloud.colors(),
-    3 * nb_particles
-  );
+	// Initialize the point cloud.
+	point_cloud = PointCloud.new(nb_particles, speed);
+	const positions = new Float32Array(
+		wasm.memory.buffer,
+		point_cloud.points(),
+		3 * nb_particles
+	);
+	const colors = new Float32Array(
+		wasm.memory.buffer,
+		point_cloud.colors(),
+		3 * nb_particles
+	);
 
-  // Bind geometry to THREE buffers.
-  pos_buffer_attr = new THREE.BufferAttribute(positions, 3).setDynamic(true);
-  col_buffer_attr = new THREE.BufferAttribute(colors, 3).setDynamic(true);
-  geometry.addAttribute("position", pos_buffer_attr);
-  geometry.addAttribute("color", col_buffer_attr);
-  let material = new THREE.PointsMaterial({size: 1, vertexColors: THREE.VertexColors});
-  let particles = new THREE.Points(geometry, material);
-  scene.add(particles);
+	// Bind geometry to THREE buffers.
+	pos_buffer_attr = new THREE.BufferAttribute(positions, 3).setDynamic(true);
+	col_buffer_attr = new THREE.BufferAttribute(colors, 3).setDynamic(true);
+	geometry.addAttribute("position", pos_buffer_attr);
+	geometry.addAttribute("color", col_buffer_attr);
+	let material = new THREE.PointsMaterial({size: 1, vertexColors: THREE.VertexColors});
+	let particles = new THREE.Points(geometry, material);
+	scene.add(particles);
 
-  // Setup the renderer.
-  renderer = new THREE.WebGLRenderer();
-  renderer.setPixelRatio(window.devicePixelRatio);
-  renderer.setSize(window.innerWidth, window.innerHeight);
-  document.body.appendChild(renderer.domElement);
+	// Setup the renderer.
+	renderer = new THREE.WebGLRenderer();
+	renderer.setPixelRatio(window.devicePixelRatio);
+	renderer.setSize(window.innerWidth, window.innerHeight);
+	document.body.appendChild(renderer.domElement);
 
-  // Display stats.
-  stats = new Stats();
-  document.body.appendChild(stats.dom);
-  window.addEventListener('resize', onWindowResize);
+	// Display stats.
+	stats = new Stats();
+	document.body.appendChild(stats.dom);
+	window.addEventListener('resize', onWindowResize);
 
-  requestAnimationFrame(renderLoop);
+	requestAnimationFrame(renderLoop);
 }
 
 function onWindowResize() {
